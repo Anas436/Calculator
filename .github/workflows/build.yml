@@ -9,6 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # standard place to keep Android SDK for buildozer & p4a
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+      ANDROID_HOME: ${{ runner.temp }}/android-sdk
+      # ensure buildozer/p4a can find Java; setup-java will populate JAVA_HOME
+      # JAVA_HOME will be set by actions/setup-java later in the job
 
     steps:
       - name: Checkout code
@@ -25,8 +31,15 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
+      - name: Setup Android SDK (cmdline-tools)
         uses: android-actions/setup-android@v2
+        # this action installs command line tools; we will use $ANDROID_SDK_ROOT below
+
+      - name: Create Android SDK directories
+        run: |
+          mkdir -p "$ANDROID_SDK_ROOT"
+          # ensure HOME/.android exists in case buildozer or sdkmanager expects it
+          mkdir -p "$HOME/.android"
 
       - name: Install system dependencies
         run: |
@@ -45,21 +58,56 @@ jobs:
             cmake \
             libffi-dev \
             libssl-dev \
-            libtinfo6
+            libtinfo6 \
+            build-essential \
+            default-jdk \
+            virtualenv
 
-      - name: Accept Android licenses
+      - name: Install Android SDK components and accept licenses
+        # Use the sdkmanager shipped in the cmdline-tools installed by setup-android
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -f "$SDKMANAGER" ]; then
+            # fallback to sdks installed in common location (setup-android may use different paths)
+            SDKMANAGER="$(command -v sdkmanager || true)"
+          fi
+          echo "Using sdkmanager: $SDKMANAGER"
+          # Ensure platform-tools, platform (android-33) and build-tools are present.
+          # Adjust the versions if you need a specific build-tools patch.
+          yes | $SDKMANAGER --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" || true
+          # If you pinned an NDK in buildozer.spec, you may add e.g. "ndk;25.1.8937393" here.
+          # Accept licenses (sdkmanager --licenses may require the same sdkmanager binary)
+          yes | $SDKMANAGER --licenses || true
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.java-home || env.JAVA_HOME }}
+      
+      - name: Show env (debug)
+        run: |
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "PATH=$PATH"
+          sdkmanager --version || true
+          java -version || true
+          python --version
 
-      - name: Install Buildozer
+      - name: Install Buildozer and tools
         run: |
-          pip install --upgrade pip
-          pip install buildozer
+          python -m pip install --upgrade pip setuptools wheel
+          pip install virtualenv
+          pip install --upgrade buildozer
           pip install cython==0.29.33
 
       - name: Build APK
+        working-directory: ${{ github.workspace }}
         run: |
+          # create a virtualenv to isolate the build environment
+          virtualenv -p python3 .venv
+          . .venv/bin/activate
+          # buildozer will download NDK/p4a if needed; having android SDK/platforms installed speeds things up
           buildozer -v android debug
+        env:
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
+          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          JAVA_HOME: ${{ env.JAVA_HOME }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
