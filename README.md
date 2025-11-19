@@ -4,9 +4,13 @@ A sleek, responsive, and user-friendly calculator application built with Python 
 
 ## 📸 Application Preview
 
-<center>![](https://github.com/Anas436/Calculator/blob/main/assets/Multiply.png)</center>
+<div align="center">
+  <img src="https://github.com/Anas436/Calculator/blob/main/assets/Multiply.png" alt="Multiplication">
+</div>
 
-<center>![](https://github.com/Anas436/Calculator/blob/main/assets/Answer.png)</center>
+<div align="center">
+  <img src="https://github.com/Anas436/Calculator/blob/main/assets/Answer.png" alt="Answer">
+</div>
 
 ## 🚀 Features
 
