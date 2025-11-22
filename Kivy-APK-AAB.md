@@ -355,5 +355,7 @@ With the above steps, you can automate the process of building a signed release 
 - Build Mobile App With Python [Link](https://www.youtube.com/watch?v=qfSJJVjp6BY&list=WL&index=11)
 - Convert Kivy Apps to APK Using GitHub Actions [Link](https://www.youtube.com/watch?v=wbJxJ2Zjy_o&list=WL&index=7)
 - Build Signed APK/AAB with GitHub Action [Link](https://www.youtube.com/watch?v=9Nf2Oz3bPIg&list=WL&index=8)
+- Create & Verify a Google Play Developer Account [Link](https://www.youtube.com/watch?v=QaNYTIXgcXk&list=WL&index=6)
+- Upload Your Android App to Google Play Store [Link](https://www.youtube.com/watch?v=F74CNRDoiaY&list=WL&index=3)
 
 ---

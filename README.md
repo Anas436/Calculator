@@ -56,7 +56,7 @@ elif current == "" and button_text in self.operators:
 Calculator/
 ├─ .github/                # GitHub metadata (workflows/templates)
 ├─ .gitignore              # Files/dirs ignored by git
-├─ Kivy-APK-AAB.md         # Detailed guide: building APK to AAB with Kivy/Buildozer
+├─ Kivy-APK-AAB.md         # Detailed guide: building APK/AAB with Buildozer
 ├─ README.md               # Descriptions about the project
 ├─ assets/                 # Static assets (icons, screenshots, images)
 ├─ buildozer.spec          # Buildozer config for packaging to Android/iOS
